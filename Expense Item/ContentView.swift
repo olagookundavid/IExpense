@@ -8,14 +8,47 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject var expenses = Expenses()
+    @State private var showAddView = false
+    
+    func removeItems(offsets: IndexSet){
+        expenses.items.remove(atOffsets: offsets)
+    }
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
-            Text("Hello, world!")
+        NavigationView{
+            List{
+                ForEach(expenses.items,id: \.id){ item in
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text(item.name)
+                                .font(.headline)
+                                .bold()
+                                .padding(.bottom,5)
+                            Text(item.type)
+                        }
+
+                        Spacer()
+
+                        Text(item.amount, format: .currency(code: "USD"))
+                    }
+                    .padding(.bottom,5)
+                    
+                }
+                .onDelete (perform: removeItems)
+            }
+            .navigationTitle("IExpense")
+            .toolbar{
+                Button {
+                    showAddView = true
+                }label: {
+                    Image(systemName: "plus")
+                }
+            }
         }
-        .padding()
+        .sheet(isPresented: $showAddView) {
+            AddView(expenses: expenses)
+        }
     }
 }
 
